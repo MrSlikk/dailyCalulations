@@ -13,12 +13,17 @@
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
+
+    <!-- Toast Notification Container -->
+    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 ease-out opacity-0 translate-y-10 pointer-events-none z-50 flex items-center gap-2">
+        <span>تم نسخ التقرير بنجاح! 📋</span>
+    </div>
 
     <div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-6 md:p-8">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">حاسبة المبيعات والوردية</h1>
+            <h1 class="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">حاسبة المبيعات اليومية</h1>
             <p class="text-gray-400 text-sm">أدخل البيانات أدناه للحصول على تقرير اليوم تلقائياً</p>
         </div>
 
@@ -27,31 +32,31 @@
             
             <!-- Date Picker -->
             <div class="md:col-span-2 flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">يوم أمس وتاريخه:</label>
+                <label class="text-sm font-medium text-gray-300">اختر التاريخ</label>
                 <input type="date" id="yesterdayDate" onchange="calculate()" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-right">
             </div>
 
             <!-- Input 1 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">١- بطايق اليوم:</label>
-                <input type="number" id="cardsToday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">١- بطايق أمس (الرصيد السابق):</label>
+                <input type="number" id="cardsYesterday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
             </div>
 
             <!-- Input 2 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٢- بطايق أمس:</label>
-                <input type="number" id="cardsYesterday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">٢- بطايق اليوم (الرصيد المتبقي):</label>
+                <input type="number" id="cardsToday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
             </div>
 
             <!-- Input 3 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٣- الكاش المتوفر:</label>
+                <label class="text-sm font-medium text-gray-300">٣- الكاش المتوفر (إجمالي كاش اليوم):</label>
                 <input type="number" id="cashAvailable" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
             </div>
 
             <!-- Input 4 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٤- الكاش من أمس:</label>
+                <label class="text-sm font-medium text-gray-300">٤- صافي الكاش من أمس:</label>
                 <input type="number" id="cashYesterday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
             </div>
 
@@ -76,14 +81,14 @@
             
             <!-- Date Display -->
             <div class="flex justify-between items-center border-b border-gray-800 pb-2">
-                <span class="text-gray-400 text-sm">يوم أمس والتاريخ:</span>
+                <span class="text-gray-400 text-sm">التاريخ:</span>
                 <span id="outDate" class="font-bold text-white text-base">-</span>
             </div>
 
-            <!-- Intermediate Calculations (Optional but good for tracking) -->
-            <div class="grid grid-cols-2 gap-4 text-xs text-gray-400 border-b border-gray-800 pb-3">
-                <div>شغل البطايق: <span id="outCardWork" class="text-gray-200 font-medium">0.00</span></div>
-                <div>صافي الكاش: <span id="outNetCash" class="text-gray-200 font-medium">0.00</span></div>
+            <!-- Intermediate Calculations Breakdown -->
+            <div class="grid grid-cols-2 gap-4 text-xs text-gray-500 border-b border-gray-800 pb-3">
+                <div>شغل البطايق: <span id="outCardWork" class="text-gray-300 font-medium">0.00</span></div>
+                <div>صافي الكاش الحالي: <span id="outNetCash" class="text-gray-300 font-medium">0.00</span></div>
             </div>
 
             <!-- Final Required Outputs -->
@@ -105,17 +110,28 @@
             </div>
         </div>
 
-        <!-- Reset Button -->
-        <button onclick="resetForm()" class="w-full mt-6 bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-2.5 rounded-xl border border-red-500/30 transition-all text-sm cursor-pointer">
-            تفريغ الحقول
-        </button>
+        <!-- Utility Buttons -->
+        <div class="grid grid-cols-2 gap-4 mt-6">
+            <button onclick="copyReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl transition-all text-sm font-bold shadow-lg cursor-pointer">
+                نسخ التقرير 📋
+            </button>
+            <button onclick="resetForm()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-3 rounded-xl border border-red-500/30 transition-all text-sm cursor-pointer">
+                تفريغ الحقول
+            </button>
+        </div>
     </div>
 
     <script>
+        // Global variables to hold final report data for easy copying
+        let formattedDateString = "-";
+        let globalCash = 0;
+        let globalNetwork = 0;
+        let globalTotal = 0;
+
         function calculate() {
             // Fetch inputs and convert to float (default to 0 if empty/invalid)
-            const cardsToday = parseFloat(document.getElementById('cardsToday').value) || 0;
             const cardsYesterday = parseFloat(document.getElementById('cardsYesterday').value) || 0;
+            const cardsToday = parseFloat(document.getElementById('cardsToday').value) || 0;
             const cashAvailable = parseFloat(document.getElementById('cashAvailable').value) || 0;
             const cashYesterday = parseFloat(document.getElementById('cashYesterday').value) || 0;
             const expensesToday = parseFloat(document.getElementById('expensesToday').value) || 0;
@@ -127,31 +143,35 @@
             
             if (dateInput) {
                 const dateObj = new Date(dateInput);
-                // Format option for Arabic day name and full date
                 const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric', calendar: 'gregory' };
-                outDateEl.innerText = dateObj.toLocaleDateString('ar-SA', options);
+                formattedDateString = dateObj.toLocaleDateString('ar-SA', options);
+                outDateEl.innerText = formattedDateString;
             } else {
+                formattedDateString = "-";
                 outDateEl.innerText = "-";
             }
 
-            // --- Calculation Formulas ---
-            // 1. شغل البطايق = بطايق اليوم - بطايق امس
-            const cardWork = cardsToday - cardsYesterday;
+            // --- Corrected Step-by-Step Logic ---
             
-            // 2. صافي الكاش = الكاش المتوفر - شغل البطايق
+            // STAGE 1: Recharge Cards Sales & current Net Cash
+            // شغل البطايق = بطايق أمس - بطايق اليوم
+            const cardWork = cardsYesterday - cardsToday;
+            // صافي الكاش = الكاش المتوفر - شغل البطايق
             const netCash = cashAvailable - cardWork;
             
-            // 3. شغل اليوم = صافي الكاش + خرجيات اليوم - الكاش من امس
-            const todayWork = netCash + expensesToday - cashYesterday;
+            // STAGE 2 & 3: Supermarket Sales without recharge cards
+            // إجمالي مبيعات اليوم = (الخرجيات + الشبكة) - صافي الكاش من أمس
+            const totalSales = (expensesToday + network) - cashYesterday;
             
-            // 4. نقداً = شغل اليوم - الشبكة
-            const cashRevenue = todayWork - network;
-            
-            // 5. شبكة = الشبكة
+            // شبكة = الشبكة
             const networkRevenue = network;
-            
-            // 6. الإجمالي = نقدا + شبكة
-            const total = cashRevenue + networkRevenue;
+            // نقداً = إجمالي مبيعات اليوم - الشبكة
+            const cashRevenue = totalSales - network;
+
+            // Store values in globals for clipboard copying
+            globalCash = cashRevenue;
+            globalNetwork = networkRevenue;
+            globalTotal = totalSales;
 
             // --- Display Outputs ---
             document.getElementById('outCardWork').innerText = cardWork.toFixed(2);
@@ -159,7 +179,35 @@
             
             document.getElementById('outCashRevenue').innerText = cashRevenue.toFixed(2);
             document.getElementById('outNetworkRevenue').innerText = networkRevenue.toFixed(2);
-            document.getElementById('outTotal').innerText = total.toFixed(2);
+            document.getElementById('outTotal').innerText = totalSales.toFixed(2);
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            // Reset transition visibility states
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
+
+            // Hide it automatically after 2 seconds
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+            }, 2000);
+        }
+
+        function copyReport() {
+            // Text template exactly as requested
+            const reportText = `${formattedDateString}\n\nنقدا: ${globalCash.toFixed(2)}\nشبكة: ${globalNetwork.toFixed(2)}\n------------\nالاجمالي: ${globalTotal.toFixed(2)}`;
+            
+            navigator.clipboard.writeText(reportText).then(() => {
+                showToast(); // Trigger custom designed notification UI
+            }).catch(err => {
+                // Fail-safe fall back text notification if permission errors happen
+                const toast = document.getElementById('toast');
+                toast.innerText = "حدث خطأ أثناء النسخ!";
+                toast.classList.replace('bg-emerald-500', 'bg-red-500');
+                showToast();
+            });
         }
 
         function resetForm() {

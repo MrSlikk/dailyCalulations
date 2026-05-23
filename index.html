@@ -1,217 +1,490 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>حاسبة المبيعات اليومية</title>
-    <!-- Tailwind CSS for modern and responsive styling -->
+
+    <!-- Tailwind CSS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+
         body {
             font-family: 'Tajawal', sans-serif;
         }
     </style>
 </head>
+
 <body class="bg-gray-900 text-gray-100 min-h-screen flex items-center justify-center p-4 relative overflow-x-hidden">
 
-    <!-- Toast Notification Container -->
-    <div id="toast" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 ease-out opacity-0 translate-y-10 pointer-events-none z-50 flex items-center gap-2">
+    <!-- Toast -->
+    <div id="toast"
+        class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-emerald-500 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 ease-out opacity-0 translate-y-10 pointer-events-none z-50 flex items-center gap-2">
         <span>تم نسخ التقرير بنجاح! 📋</span>
     </div>
 
     <div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-6 md:p-8">
+
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">حاسبة المبيعات اليومية</h1>
-            <p class="text-gray-400 text-sm">أدخل البيانات أدناه للحصول على تقرير اليوم تلقائياً</p>
+            <h1 class="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">
+                حاسبة المبيعات اليومية
+            </h1>
+
+            <p class="text-gray-400 text-sm">
+                أدخل البيانات أدناه للحصول على تقرير اليوم تلقائياً
+            </p>
         </div>
 
-        <!-- Form Inputs -->
+        <!-- Inputs -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-8">
-            
-            <!-- Date Picker -->
+
+            <!-- Date -->
             <div class="md:col-span-2 flex flex-col gap-2">
                 <label class="text-sm font-medium text-gray-300">اختر التاريخ</label>
-                <input type="date" id="yesterdayDate" onchange="calculate()" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-right">
+
+                <input type="date" id="yesterdayDate" onchange="calculate()"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-right" />
             </div>
 
             <!-- Input 1 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">١- بطايق أمس (الرصيد السابق):</label>
-                <input type="number" id="cardsYesterday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">
+                    ١- بطايق أمس (الرصيد السابق):
+                </label>
+
+                <input type="number" id="cardsYesterday" oninput="calculate()" placeholder="0.00"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
 
             <!-- Input 2 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٢- بطايق اليوم (الرصيد المتبقي):</label>
-                <input type="number" id="cardsToday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">
+                    ٢- بطايق اليوم (الرصيد المتبقي):
+                </label>
+
+                <input type="number" id="cardsToday" oninput="calculate()" placeholder="0.00"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
 
             <!-- Input 3 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٣- الكاش المتوفر (إجمالي كاش اليوم):</label>
-                <input type="number" id="cashAvailable" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">
+                    ٣- الكاش المتوفر (إجمالي كاش اليوم):
+                </label>
+
+                <input type="number" id="cashAvailable" oninput="calculate()" placeholder="0.00"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
 
             <!-- Input 4 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٤- صافي الكاش من أمس:</label>
-                <input type="number" id="cashYesterday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">
+                    ٤- صافي الكاش من أمس:
+                </label>
+
+                <input type="number" id="cashYesterday" oninput="calculate()" placeholder="0.00"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
 
             <!-- Input 5 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٥- خرجيات اليوم:</label>
-                <input type="number" id="expensesToday" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
+                <label class="text-sm font-medium text-gray-300">
+                    ٥- خرجيات اليوم:
+                </label>
+
+                <input type="number" id="expensesToday" oninput="calculate()" placeholder="0.00"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
 
             <!-- Input 6 -->
             <div class="flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">٦- الشبكة:</label>
-                <input type="number" id="network" oninput="calculate()" placeholder="0.00" class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all">
-            </div>
+                <label class="text-sm font-medium text-gray-300">
+                    ٦- الشبكة:
+                </label>
 
+                <input type="number" id="network" oninput="calculate()" placeholder="0.00"
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
+            </div>
         </div>
 
-        <hr class="border-gray-700 my-6">
+        <hr class="border-gray-700 my-6" />
 
-        <!-- Output Results Section -->
+        <!-- Results -->
         <div class="bg-gray-900 rounded-xl p-5 border border-gray-700 space-y-4">
-            
-            <!-- Date Display -->
+
+            <!-- Date -->
             <div class="flex justify-between items-center border-b border-gray-800 pb-2">
                 <span class="text-gray-400 text-sm">التاريخ:</span>
+
                 <span id="outDate" class="font-bold text-white text-base">-</span>
             </div>
 
-            <!-- Intermediate Calculations Breakdown -->
+            <!-- Details -->
             <div class="grid grid-cols-2 gap-4 text-xs text-gray-500 border-b border-gray-800 pb-3">
-                <div>شغل البطايق: <span id="outCardWork" class="text-gray-300 font-medium">0.00</span></div>
-                <div>صافي الكاش الحالي: <span id="outNetCash" class="text-gray-300 font-medium">0.00</span></div>
+                <div>
+                    شغل البطايق:
+                    <span id="outCardWork" class="text-gray-300 font-medium">0.00</span>
+                </div>
+
+                <div>
+                    صافي الكاش الحالي:
+                    <span id="outNetCash" class="text-gray-300 font-medium">0.00</span>
+                </div>
             </div>
 
-            <!-- Final Required Outputs -->
+            <!-- Final -->
             <div class="flex justify-between items-center pt-2">
                 <span class="text-gray-300 font-medium">نقداً:</span>
-                <span id="outCashRevenue" class="font-bold text-xl text-emerald-400">0.00</span>
+
+                <span id="outCashRevenue" class="font-bold text-xl text-emerald-400">
+                    0.00
+                </span>
             </div>
 
             <div class="flex justify-between items-center">
                 <span class="text-gray-300 font-medium">شبكة:</span>
-                <span id="outNetworkRevenue" class="font-bold text-xl text-blue-400">0.00</span>
+
+                <span id="outNetworkRevenue" class="font-bold text-xl text-blue-400">
+                    0.00
+                </span>
             </div>
 
             <div class="border-t border-dashed border-gray-600 my-2"></div>
 
-            <div class="flex justify-between items-center bg-gray-800 p-3 rounded-lg border border-gray-700">
+            <div
+                class="flex justify-between items-center bg-gray-800 p-3 rounded-lg border border-gray-700">
                 <span class="text-gray-200 font-bold text-lg">الإجمالي:</span>
-                <span id="outTotal" class="font-black text-2xl text-amber-400">0.00</span>
+
+                <span id="outTotal" class="font-black text-2xl text-amber-400">
+                    0.00
+                </span>
             </div>
         </div>
 
-        <!-- Utility Buttons -->
-        <div class="grid grid-cols-2 gap-4 mt-6">
-            <button onclick="copyReport()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl transition-all text-sm font-bold shadow-lg cursor-pointer">
+        <!-- Buttons -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+
+            <button onclick="copyReport()"
+                class="bg-emerald-600 hover:bg-emerald-700 text-white font-medium py-3 rounded-xl transition-all text-sm font-bold shadow-lg cursor-pointer">
                 نسخ التقرير 📋
             </button>
-            <button onclick="resetForm()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-3 rounded-xl border border-red-500/30 transition-all text-sm cursor-pointer">
+
+            <button onclick="sendWhatsApp()"
+                class="bg-green-600 hover:bg-green-700 text-white font-medium py-3 rounded-xl transition-all text-sm font-bold shadow-lg cursor-pointer">
+                واتساب 📱
+            </button>
+
+            <button onclick="resetForm()"
+                class="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-3 rounded-xl border border-red-500/30 transition-all text-sm cursor-pointer">
                 تفريغ الحقول
             </button>
+        </div>
+
+        <!-- Last 7 Days Logs -->
+        <div class="mt-8">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="text-lg font-bold text-white">
+                    سجل آخر ٧ أيام
+                </h2>
+
+                <button onclick="clearLogs()"
+                    class="text-xs text-red-400 hover:text-red-300 transition-all cursor-pointer">
+                    حذف السجل
+                </button>
+            </div>
+
+            <div id="logsContainer" class="space-y-3"></div>
         </div>
     </div>
 
     <script>
-        // Global variables to hold final report data for easy copying
+
+        // Globals
         let formattedDateString = "-";
         let globalCash = 0;
         let globalNetwork = 0;
         let globalTotal = 0;
 
+        // Calculate
         function calculate() {
-            // Fetch inputs and convert to float (default to 0 if empty/invalid)
-            const cardsYesterday = parseFloat(document.getElementById('cardsYesterday').value) || 0;
-            const cardsToday = parseFloat(document.getElementById('cardsToday').value) || 0;
-            const cashAvailable = parseFloat(document.getElementById('cashAvailable').value) || 0;
-            const cashYesterday = parseFloat(document.getElementById('cashYesterday').value) || 0;
-            const expensesToday = parseFloat(document.getElementById('expensesToday').value) || 0;
-            const network = parseFloat(document.getElementById('network').value) || 0;
 
-            // Handle Date formatting to Arabic Day Name + Date
-            const dateInput = document.getElementById('yesterdayDate').value;
-            const outDateEl = document.getElementById('outDate');
-            
+            const cardsYesterday =
+                parseFloat(document.getElementById('cardsYesterday').value) || 0;
+
+            const cardsToday =
+                parseFloat(document.getElementById('cardsToday').value) || 0;
+
+            const cashAvailable =
+                parseFloat(document.getElementById('cashAvailable').value) || 0;
+
+            const cashYesterday =
+                parseFloat(document.getElementById('cashYesterday').value) || 0;
+
+            const expensesToday =
+                parseFloat(document.getElementById('expensesToday').value) || 0;
+
+            const network =
+                parseFloat(document.getElementById('network').value) || 0;
+
+            // Date
+            const dateInput =
+                document.getElementById('yesterdayDate').value;
+
+            const outDateEl =
+                document.getElementById('outDate');
+
             if (dateInput) {
+
                 const dateObj = new Date(dateInput);
-                const options = { weekday: 'long', year: 'numeric', month: 'numeric', day: 'numeric', calendar: 'gregory' };
-                formattedDateString = dateObj.toLocaleDateString('ar-SA', options);
+
+                const options = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'numeric',
+                    day: 'numeric',
+                    calendar: 'gregory'
+                };
+
+                formattedDateString =
+                    dateObj.toLocaleDateString('ar-SA', options);
+
                 outDateEl.innerText = formattedDateString;
+
             } else {
+
                 formattedDateString = "-";
                 outDateEl.innerText = "-";
             }
 
-            // --- Corrected Step-by-Step Logic ---
-            
-            // STAGE 1: Recharge Cards Sales & current Net Cash
-            // شغل البطايق = بطايق أمس - بطايق اليوم
-            const cardWork = cardsYesterday - cardsToday;
-            // صافي الكاش = الكاش المتوفر - شغل البطايق
-            const netCash = cashAvailable - cardWork;
-            
-            // STAGE 2 & 3: Supermarket Sales without recharge cards
-            // إجمالي مبيعات اليوم = (الخرجيات + الشبكة) - صافي الكاش من أمس
-            const totalSales = (expensesToday + network) - cashYesterday;
-            
-            // شبكة = الشبكة
-            const networkRevenue = network;
-            // نقداً = إجمالي مبيعات اليوم - الشبكة
-            const cashRevenue = totalSales - network;
+            // Calculations
+            const cardWork =
+                cardsYesterday - cardsToday;
 
-            // Store values in globals for clipboard copying
+            const netCash =
+                cashAvailable - cardWork;
+
+            const totalSales =
+                (expensesToday + network) - cashYesterday;
+
+            const networkRevenue =
+                network;
+
+            const cashRevenue =
+                totalSales - network;
+
+            // Store globals
             globalCash = cashRevenue;
             globalNetwork = networkRevenue;
             globalTotal = totalSales;
 
-            // --- Display Outputs ---
-            document.getElementById('outCardWork').innerText = cardWork.toFixed(2);
-            document.getElementById('outNetCash').innerText = netCash.toFixed(2);
-            
-            document.getElementById('outCashRevenue').innerText = cashRevenue.toFixed(2);
-            document.getElementById('outNetworkRevenue').innerText = networkRevenue.toFixed(2);
-            document.getElementById('outTotal').innerText = totalSales.toFixed(2);
+            // Output
+            document.getElementById('outCardWork').innerText =
+                cardWork.toFixed(2);
+
+            document.getElementById('outNetCash').innerText =
+                netCash.toFixed(2);
+
+            document.getElementById('outCashRevenue').innerText =
+                cashRevenue.toFixed(2);
+
+            document.getElementById('outNetworkRevenue').innerText =
+                networkRevenue.toFixed(2);
+
+            document.getElementById('outTotal').innerText =
+                totalSales.toFixed(2);
         }
 
-        function showToast() {
-            const toast = document.getElementById('toast');
-            // Reset transition visibility states
-            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
-            toast.classList.add('opacity-100', 'translate-y-0');
+        // Toast
+        function showToast(message = "تم نسخ التقرير بنجاح! 📋", success = true) {
 
-            // Hide it automatically after 2 seconds
+            const toast =
+                document.getElementById('toast');
+
+            toast.innerHTML = `<span>${message}</span>`;
+
+            toast.className =
+                `fixed bottom-6 left-1/2 -translate-x-1/2 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 ease-out z-50 flex items-center gap-2 ${success ? 'bg-emerald-500' : 'bg-red-500'
+                }`;
+
+            toast.classList.remove(
+                'opacity-0',
+                'translate-y-10',
+                'pointer-events-none'
+            );
+
+            toast.classList.add(
+                'opacity-100',
+                'translate-y-0'
+            );
+
             setTimeout(() => {
-                toast.classList.remove('opacity-100', 'translate-y-0');
-                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
+
+                toast.classList.remove(
+                    'opacity-100',
+                    'translate-y-0'
+                );
+
+                toast.classList.add(
+                    'opacity-0',
+                    'translate-y-10',
+                    'pointer-events-none'
+                );
+
             }, 2000);
         }
 
-        function copyReport() {
-            // Text template exactly as requested
-            const reportText = `${formattedDateString}\n\nنقدا: ${globalCash.toFixed(2)}\nشبكة: ${globalNetwork.toFixed(2)}\n------------\nالاجمالي: ${globalTotal.toFixed(2)}`;
-            
-            navigator.clipboard.writeText(reportText).then(() => {
-                showToast(); // Trigger custom designed notification UI
-            }).catch(err => {
-                // Fail-safe fall back text notification if permission errors happen
-                const toast = document.getElementById('toast');
-                toast.innerText = "حدث خطأ أثناء النسخ!";
-                toast.classList.replace('bg-emerald-500', 'bg-red-500');
-                showToast();
-            });
+        // Report text
+        function generateReportText() {
+
+            return `${formattedDateString}
+
+نقدا: ${globalCash.toFixed(2)}
+شبكة: ${globalNetwork.toFixed(2)}
+------------
+الاجمالي: ${globalTotal.toFixed(2)}`;
         }
 
+        // Copy
+        function copyReport() {
+
+            const reportText =
+                generateReportText();
+
+            navigator.clipboard.writeText(reportText)
+                .then(() => {
+
+                    showToast();
+
+                })
+                .catch(() => {
+
+                    showToast("حدث خطأ أثناء النسخ!", false);
+
+                });
+        }
+
+        // WhatsApp
+        function sendWhatsApp() {
+
+            const reportText =
+                generateReportText();
+
+            const encodedText =
+                encodeURIComponent(reportText);
+
+            saveLog();
+
+            window.open(
+                `https://wa.me/?text=${encodedText}`,
+                '_blank'
+            );
+        }
+
+        // Save logs
+        function saveLog() {
+
+            if (formattedDateString === "-") {
+                return;
+            }
+
+            let logs =
+                JSON.parse(localStorage.getItem('salesLogs')) || [];
+
+            const newLog = {
+                date: formattedDateString,
+                cash: globalCash.toFixed(2),
+                network: globalNetwork.toFixed(2),
+                total: globalTotal.toFixed(2),
+                timestamp: Date.now()
+            };
+
+            // Prevent duplicate same day
+            logs = logs.filter(log => log.date !== formattedDateString);
+
+            logs.unshift(newLog);
+
+            // Keep only last 7
+            logs = logs.slice(0, 7);
+
+            localStorage.setItem(
+                'salesLogs',
+                JSON.stringify(logs)
+            );
+
+            renderLogs();
+        }
+
+        // Render logs
+        function renderLogs() {
+
+            const container =
+                document.getElementById('logsContainer');
+
+            const logs =
+                JSON.parse(localStorage.getItem('salesLogs')) || [];
+
+            if (logs.length === 0) {
+
+                container.innerHTML = `
+                    <div class="text-center text-gray-500 text-sm py-4 border border-dashed border-gray-700 rounded-xl">
+                        لا يوجد سجل حالياً
+                    </div>
+                `;
+
+                return;
+            }
+
+            container.innerHTML = logs.map(log => `
+                <div class="bg-gray-900 border border-gray-700 rounded-xl p-4">
+                    
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-sm text-gray-400">
+                            ${log.date}
+                        </span>
+
+                        <span class="text-amber-400 font-bold">
+                            ${log.total}
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        
+                        <div class="bg-gray-800 rounded-lg p-2 text-center">
+                            <div class="text-gray-400 mb-1">نقداً</div>
+
+                            <div class="text-emerald-400 font-bold">
+                                ${log.cash}
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-800 rounded-lg p-2 text-center">
+                            <div class="text-gray-400 mb-1">شبكة</div>
+
+                            <div class="text-blue-400 font-bold">
+                                ${log.network}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Clear logs
+        function clearLogs() {
+
+            localStorage.removeItem('salesLogs');
+
+            renderLogs();
+
+            showToast("تم حذف السجل", true);
+        }
+
+        // Reset
         function resetForm() {
-            // Clear all inputs
+
             document.getElementById('yesterdayDate').value = '';
             document.getElementById('cardsToday').value = '';
             document.getElementById('cardsYesterday').value = '';
@@ -219,10 +492,13 @@
             document.getElementById('cashYesterday').value = '';
             document.getElementById('expensesToday').value = '';
             document.getElementById('network').value = '';
-            
-            // Recalculate to reset outputs
+
             calculate();
         }
+
+        // Initial load
+        renderLogs();
+
     </script>
 </body>
 </html>

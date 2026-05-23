@@ -43,9 +43,7 @@
 
             <!-- Date -->
             <div class="md:col-span-2 flex flex-col gap-2">
-                <label class="text-sm font-medium text-gray-300">
-                    اختر التاريخ
-                </label>
+                <label class="text-sm font-medium text-gray-300">اختر التاريخ</label>
 
                 <input type="date" id="yesterdayDate" onchange="calculate()"
                     class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-right" />
@@ -110,7 +108,6 @@
                 <input type="number" id="network" oninput="calculate()" placeholder="0.00"
                     class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
-
         </div>
 
         <hr class="border-gray-700 my-6" />
@@ -127,29 +124,22 @@
 
             <!-- Details -->
             <div class="grid grid-cols-2 gap-4 text-xs text-gray-500 border-b border-gray-800 pb-3">
-
                 <div>
                     شغل البطايق:
-                    <span id="outCardWork" class="text-gray-300 font-medium">
-                        0.00
-                    </span>
+                    <span id="outCardWork" class="text-gray-300 font-medium">0.00</span>
                 </div>
 
                 <div>
                     صافي الكاش الحالي:
-                    <span id="outNetCash" class="text-gray-300 font-medium">
-                        0.00
-                    </span>
+                    <span id="outNetCash" class="text-gray-300 font-medium">0.00</span>
                 </div>
-
             </div>
 
             <!-- Final -->
             <div class="flex justify-between items-center pt-2">
                 <span class="text-gray-300 font-medium">نقداً:</span>
 
-                <span id="outCashRevenue"
-                    class="font-bold text-xl text-emerald-400">
+                <span id="outCashRevenue" class="font-bold text-xl text-emerald-400">
                     0.00
                 </span>
             </div>
@@ -157,25 +147,21 @@
             <div class="flex justify-between items-center">
                 <span class="text-gray-300 font-medium">شبكة:</span>
 
-                <span id="outNetworkRevenue"
-                    class="font-bold text-xl text-blue-400">
+                <span id="outNetworkRevenue" class="font-bold text-xl text-blue-400">
                     0.00
                 </span>
             </div>
 
             <div class="border-t border-dashed border-gray-600 my-2"></div>
 
-            <div class="flex justify-between items-center bg-gray-800 p-3 rounded-lg border border-gray-700">
-                <span class="text-gray-200 font-bold text-lg">
-                    الإجمالي:
-                </span>
+            <div
+                class="flex justify-between items-center bg-gray-800 p-3 rounded-lg border border-gray-700">
+                <span class="text-gray-200 font-bold text-lg">الإجمالي:</span>
 
-                <span id="outTotal"
-                    class="font-black text-2xl text-amber-400">
+                <span id="outTotal" class="font-black text-2xl text-amber-400">
                     0.00
                 </span>
             </div>
-
         </div>
 
         <!-- Buttons -->
@@ -195,14 +181,11 @@
                 class="bg-red-500/10 hover:bg-red-500/20 text-red-400 font-medium py-3 rounded-xl border border-red-500/30 transition-all text-sm cursor-pointer">
                 تفريغ الحقول
             </button>
-
         </div>
 
-        <!-- Logs -->
+        <!-- Last 7 Days Logs -->
         <div class="mt-8">
-
             <div class="flex items-center justify-between mb-4">
-
                 <h2 class="text-lg font-bold text-white">
                     سجل آخر ٧ أيام
                 </h2>
@@ -211,13 +194,10 @@
                     class="text-xs text-red-400 hover:text-red-300 transition-all cursor-pointer">
                     حذف السجل
                 </button>
-
             </div>
 
             <div id="logsContainer" class="space-y-3"></div>
-
         </div>
-
     </div>
 
     <script>
@@ -318,7 +298,7 @@
         }
 
         // Toast
-        function showToast(message = "تمت العملية بنجاح", success = true) {
+        function showToast(message = "تم نسخ التقرير بنجاح! 📋", success = true) {
 
             const toast =
                 document.getElementById('toast');
@@ -376,7 +356,7 @@
             navigator.clipboard.writeText(reportText)
                 .then(() => {
 
-                    showToast("تم نسخ التقرير بنجاح 📋");
+                    showToast();
 
                 })
                 .catch(() => {
@@ -410,32 +390,14 @@
                 return;
             }
 
-            const cardsYesterday =
-                parseFloat(document.getElementById('cardsYesterday').value) || 0;
-
-            const cardsToday =
-                parseFloat(document.getElementById('cardsToday').value) || 0;
-
-            const cardWork =
-                cardsYesterday - cardsToday;
-
             let logs =
                 JSON.parse(localStorage.getItem('salesLogs')) || [];
 
             const newLog = {
-
                 date: formattedDateString,
-
                 cash: globalCash.toFixed(2),
-
                 network: globalNetwork.toFixed(2),
-
                 total: globalTotal.toFixed(2),
-
-                cardWork: cardWork.toFixed(2),
-
-                remainingCards: cardsToday.toFixed(2),
-
                 timestamp: Date.now()
             };
 
@@ -444,7 +406,7 @@
 
             logs.unshift(newLog);
 
-            // Keep only 7 logs
+            // Keep only last 7
             logs = logs.slice(0, 7);
 
             localStorage.setItem(
@@ -476,11 +438,9 @@
             }
 
             container.innerHTML = logs.map(log => `
-
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-4">
-
+                    
                     <div class="flex justify-between items-center mb-3">
-
                         <span class="text-sm text-gray-400">
                             ${log.date}
                         </span>
@@ -488,67 +448,27 @@
                         <span class="text-amber-400 font-bold">
                             ${log.total}
                         </span>
-
                     </div>
 
-                    <div class="grid grid-cols-2 gap-3 text-sm mb-3">
-
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-
-                            <div class="text-gray-400 mb-1">
-                                نقداً
-                            </div>
+                            <div class="text-gray-400 mb-1">نقداً</div>
 
                             <div class="text-emerald-400 font-bold">
                                 ${log.cash}
                             </div>
-
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-
-                            <div class="text-gray-400 mb-1">
-                                شبكة
-                            </div>
+                            <div class="text-gray-400 mb-1">شبكة</div>
 
                             <div class="text-blue-400 font-bold">
                                 ${log.network}
                             </div>
-
                         </div>
-
                     </div>
-
-                    <div class="grid grid-cols-2 gap-3 text-sm">
-
-                        <div class="bg-gray-800 rounded-lg p-2 text-center">
-
-                            <div class="text-gray-400 mb-1">
-                                شغل البطايق
-                            </div>
-
-                            <div class="text-purple-400 font-bold">
-                                ${log.cardWork}
-                            </div>
-
-                        </div>
-
-                        <div class="bg-gray-800 rounded-lg p-2 text-center">
-
-                            <div class="text-gray-400 mb-1">
-                                الرصيد المتبقي
-                            </div>
-
-                            <div class="text-cyan-400 font-bold">
-                                ${log.remainingCards}
-                            </div>
-
-                        </div>
-
-                    </div>
-
                 </div>
-
             `).join('');
         }
 
@@ -559,7 +479,7 @@
 
             renderLogs();
 
-            showToast("تم حذف السجل");
+            showToast("تم حذف السجل", true);
         }
 
         // Reset
@@ -580,6 +500,5 @@
         renderLogs();
 
     </script>
-
 </body>
 </html>

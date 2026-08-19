@@ -3,7 +3,7 @@ const ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/final_icon_192.png'
+  '/icon-192.png'
 ];
 
 // تسجيل الملفات في الذاكرة

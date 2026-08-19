@@ -31,12 +31,12 @@
         <span>تم نسخ التقرير بنجاح! 📋</span>
     </div>
 
-    <div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-6 md:p-8">
+    <div class="w-full max-w-2xl bg-gray-800 rounded-2xl shadow-2xl border border-gray-700 p-6 md:p-8 my-6">
 
         <!-- Header -->
         <div class="text-center mb-8">
             <img src="icon-192.png" alt="الشعار" class="w-20 h-20 mx-auto mb-4 rounded-2xl shadow-lg border border-gray-700 object-cover">
-            
+
             <h1 class="text-2xl md:text-3xl font-bold text-emerald-400 mb-2">
                 حاسبة المبيعات اليومية
             </h1>
@@ -229,79 +229,62 @@
     </div>
 
     <script>
-
         // Globals
         let formattedDateString = "-";
         let globalCash = 0;
         let globalNetwork = 0;
         let globalTotal = 0;
 
+        // Set Default Today Date on Load
+        window.addEventListener('DOMContentLoaded', () => {
+            const dateInput = document.getElementById('yesterdayDate');
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            
+            dateInput.value = `${year}-${month}-${day}`;
+            calculate();
+            renderLogs();
+        });
+
         // Calculate
         function calculate() {
+            const cardsYesterday = parseFloat(document.getElementById('cardsYesterday').value) || 0;
+            const cardsToday = parseFloat(document.getElementById('cardsToday').value) || 0;
+            const cashAvailable = parseFloat(document.getElementById('cashAvailable').value) || 0;
+            const cashYesterday = parseFloat(document.getElementById('cashYesterday').value) || 0;
+            const expensesToday = parseFloat(document.getElementById('expensesToday').value) || 0;
+            const network = parseFloat(document.getElementById('network').value) || 0;
 
-            const cardsYesterday =
-                parseFloat(document.getElementById('cardsYesterday').value) || 0;
-
-            const cardsToday =
-                parseFloat(document.getElementById('cardsToday').value) || 0;
-
-            const cashAvailable =
-                parseFloat(document.getElementById('cashAvailable').value) || 0;
-
-            const cashYesterday =
-                parseFloat(document.getElementById('cashYesterday').value) || 0;
-
-            const expensesToday =
-                parseFloat(document.getElementById('expensesToday').value) || 0;
-
-            const network =
-                parseFloat(document.getElementById('network').value) || 0;
-
-            // Date
-            const dateInput =
-                document.getElementById('yesterdayDate').value;
-
-            const outDateEl =
-                document.getElementById('outDate');
+            // Date Formatting Fix (prevents UTC timezone offset issues)
+            const dateInput = document.getElementById('yesterdayDate').value;
+            const outDateEl = document.getElementById('outDate');
 
             if (dateInput) {
-
-                const dateObj = new Date(dateInput);
+                const parts = dateInput.split('-');
+                const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
 
                 const options = {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'numeric',
-                    day: 'numeric',
-                    calendar: 'gregory'
+                    day: 'numeric'
                 };
 
-                formattedDateString =
-                    dateObj.toLocaleDateString('ar-SA', options);
-
+                formattedDateString = dateObj.toLocaleDateString('ar-SA', options);
                 outDateEl.innerText = formattedDateString;
-
             } else {
-
                 formattedDateString = "-";
                 outDateEl.innerText = "-";
             }
 
             // Calculations
-            const cardWork =
-                cardsYesterday - cardsToday;
-
-            const netCash =
-                cashAvailable - cardWork;
-
-            const totalSales =
-                ((expensesToday + network) - cashYesterday) + netCash;
-
-            const networkRevenue =
-                network;
-
-            const cashRevenue =
-                totalSales - network;
+            const cardWork = cardsYesterday - cardsToday;
+            const netCash = cashAvailable - cardWork;
+            const totalSales = ((expensesToday + network) - cashYesterday) + netCash;
+            const networkRevenue = network;
+            const cashRevenue = totalSales - network;
 
             // Store globals
             globalCash = cashRevenue;
@@ -309,64 +292,33 @@
             globalTotal = totalSales;
 
             // Output
-            document.getElementById('outCardWork').innerText =
-                cardWork.toFixed(2);
-
-            document.getElementById('outNetCash').innerText =
-                netCash.toFixed(2);
-
-            document.getElementById('outCashRevenue').innerText =
-                cashRevenue.toFixed(2);
-
-            document.getElementById('outNetworkRevenue').innerText =
-                networkRevenue.toFixed(2);
-
-            document.getElementById('outTotal').innerText =
-                totalSales.toFixed(2);
+            document.getElementById('outCardWork').innerText = cardWork.toFixed(2);
+            document.getElementById('outNetCash').innerText = netCash.toFixed(2);
+            document.getElementById('outCashRevenue').innerText = cashRevenue.toFixed(2);
+            document.getElementById('outNetworkRevenue').innerText = networkRevenue.toFixed(2);
+            document.getElementById('outTotal').innerText = totalSales.toFixed(2);
         }
 
         // Toast
         function showToast(message = "تمت العملية بنجاح", success = true) {
-
-            const toast =
-                document.getElementById('toast');
-
+            const toast = document.getElementById('toast');
             toast.innerHTML = `<span>${message}</span>`;
 
-            toast.className =
-                `fixed bottom-6 left-1/2 -translate-x-1/2 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 ease-out z-50 flex items-center gap-2 ${success ? 'bg-emerald-500' : 'bg-red-500'
-                }`;
+            toast.className = `fixed bottom-6 left-1/2 -translate-x-1/2 text-gray-900 font-bold px-6 py-3 rounded-xl shadow-2xl transition-all duration-300 ease-out z-50 flex items-center gap-2 ${
+                success ? 'bg-emerald-500' : 'bg-red-500'
+            }`;
 
-            toast.classList.remove(
-                'opacity-0',
-                'translate-y-10',
-                'pointer-events-none'
-            );
-
-            toast.classList.add(
-                'opacity-100',
-                'translate-y-0'
-            );
+            toast.classList.remove('opacity-0', 'translate-y-10', 'pointer-events-none');
+            toast.classList.add('opacity-100', 'translate-y-0');
 
             setTimeout(() => {
-
-                toast.classList.remove(
-                    'opacity-100',
-                    'translate-y-0'
-                );
-
-                toast.classList.add(
-                    'opacity-0',
-                    'translate-y-10',
-                    'pointer-events-none'
-                );
-
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', 'translate-y-10', 'pointer-events-none');
             }, 2000);
         }
 
         // Report text
         function generateReportText() {
-
             return `${formattedDateString}
 
 نقدا: ${globalCash.toFixed(0)}
@@ -377,31 +329,21 @@
 
         // Copy
         function copyReport() {
-
-            const reportText =
-                generateReportText();
+            const reportText = generateReportText();
 
             navigator.clipboard.writeText(reportText)
                 .then(() => {
-
                     showToast("تم نسخ التقرير بنجاح 📋");
-
                 })
                 .catch(() => {
-
                     showToast("حدث خطأ أثناء النسخ!", false);
-
                 });
         }
 
         // WhatsApp
         function sendWhatsApp() {
-
-            const reportText =
-                generateReportText();
-
-            const encodedText =
-                encodeURIComponent(reportText);
+            const reportText = generateReportText();
+            const encodedText = encodeURIComponent(reportText);
 
             saveLog();
 
@@ -413,223 +355,124 @@
 
         // Save FULL input values
         function saveLog() {
+            if (formattedDateString === "-") return;
 
-            if (formattedDateString === "-") {
-                return;
-            }
-
-            let logs =
-                JSON.parse(localStorage.getItem('salesLogs')) || [];
+            let logs = JSON.parse(localStorage.getItem('salesLogs')) || [];
 
             const newLog = {
-
                 date: formattedDateString,
 
                 // INPUT VALUES
-                cardsYesterday:
-                    document.getElementById('cardsYesterday').value || "0",
-
-                cardsToday:
-                    document.getElementById('cardsToday').value || "0",
-
-                cashAvailable:
-                    document.getElementById('cashAvailable').value || "0",
-
-                cashYesterday:
-                    document.getElementById('cashYesterday').value || "0",
-
-                expensesToday:
-                    document.getElementById('expensesToday').value || "0",
-
-                networkInput:
-                    document.getElementById('network').value || "0",
+                cardsYesterday: document.getElementById('cardsYesterday').value || "0",
+                cardsToday: document.getElementById('cardsToday').value || "0",
+                cashAvailable: document.getElementById('cashAvailable').value || "0",
+                cashYesterday: document.getElementById('cashYesterday').value || "0",
+                expensesToday: document.getElementById('expensesToday').value || "0",
+                networkInput: document.getElementById('network').value || "0",
 
                 // OUTPUT VALUES
-                cash:
-                    globalCash.toFixed(2),
-
-                network:
-                    globalNetwork.toFixed(2),
-
-                total:
-                    globalTotal.toFixed(2),
-
-                timestamp:
-                    Date.now()
+                cash: globalCash.toFixed(2),
+                network: globalNetwork.toFixed(2),
+                total: globalTotal.toFixed(2),
+                timestamp: Date.now()
             };
 
             // Prevent duplicate same day
             logs = logs.filter(log => log.date !== formattedDateString);
-
             logs.unshift(newLog);
 
             // Keep only 7 logs
             logs = logs.slice(0, 7);
 
-            localStorage.setItem(
-                'salesLogs',
-                JSON.stringify(logs)
-            );
-
+            localStorage.setItem('salesLogs', JSON.stringify(logs));
             renderLogs();
         }
 
         // Render logs
         function renderLogs() {
-
-            const container =
-                document.getElementById('logsContainer');
-
-            const logs =
-                JSON.parse(localStorage.getItem('salesLogs')) || [];
+            const container = document.getElementById('logsContainer');
+            const logs = JSON.parse(localStorage.getItem('salesLogs')) || [];
 
             if (logs.length === 0) {
-
                 container.innerHTML = `
                     <div class="text-center text-gray-500 text-sm py-4 border border-dashed border-gray-700 rounded-xl">
                         لا يوجد سجل حالياً
                     </div>
                 `;
-
                 return;
             }
 
             container.innerHTML = logs.map(log => `
-
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-4">
-
                     <!-- Header -->
                     <div class="flex justify-between items-center mb-4">
-
-                        <span class="text-sm text-gray-400">
-                            ${log.date}
-                        </span>
-
-                        <span class="text-amber-400 font-bold">
-                            ${log.total}
-                        </span>
-
+                        <span class="text-sm text-gray-400">${log.date}</span>
+                        <span class="text-amber-400 font-bold">${log.total}</span>
                     </div>
 
                     <!-- INPUT VALUES -->
-                    <div class="grid grid-cols-2 gap-3 text-sm mb-4">
-
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-4">
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                بطايق أمس
-                            </div>
-
-                            <div class="text-white font-bold">
-                                ${log.cardsYesterday}
-                            </div>
+                            <div class="text-gray-400 text-xs mb-1">بطايق أمس</div>
+                            <div class="text-white font-bold">${log.cardsYesterday}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                الرصيد المتبقي
-                            </div>
-
-                            <div class="text-cyan-400 font-bold">
-                                ${log.cardsToday}
-                            </div>
+                            <div class="text-gray-400 text-xs mb-1">الرصيد المتبقي</div>
+                            <div class="text-cyan-400 font-bold">${log.cardsToday}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                الكاش المتوفر
-                            </div>
-
-                            <div class="text-white font-bold">
-                                ${log.cashAvailable}
-                            </div>
+                            <div class="text-gray-400 text-xs mb-1">الكاش المتوفر</div>
+                            <div class="text-white font-bold">${log.cashAvailable}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                صافي كاش أمس
-                            </div>
-
-                            <div class="text-white font-bold">
-                                ${log.cashYesterday}
-                            </div>
+                            <div class="text-gray-400 text-xs mb-1">صافي كاش أمس</div>
+                            <div class="text-white font-bold">${log.cashYesterday}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                خرجيات اليوم
-                            </div>
-
-                            <div class="text-white font-bold">
-                                ${log.expensesToday}
-                            </div>
+                            <div class="text-gray-400 text-xs mb-1">خرجيات اليوم</div>
+                            <div class="text-white font-bold">${log.expensesToday}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                الشبكة
-                            </div>
-
-                            <div class="text-blue-400 font-bold">
-                                ${log.networkInput}
-                            </div>
+                            <div class="text-gray-400 text-xs mb-1">الشبكة</div>
+                            <div class="text-blue-400 font-bold">${log.networkInput}</div>
                         </div>
-
                     </div>
 
                     <!-- FINAL RESULTS -->
-                    <div class="grid grid-cols-3 gap-3 text-sm">
-
-                        <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                نقداً
-                            </div>
-
-                            <div class="text-emerald-400 font-bold">
-                                ${log.cash}
-                            </div>
+                    <div class="grid grid-cols-3 gap-3 text-sm border-t border-gray-800 pt-3">
+                        <div class="bg-gray-800/50 rounded-lg p-2 text-center">
+                            <div class="text-gray-400 text-xs mb-1">نقداً</div>
+                            <div class="text-emerald-400 font-bold">${log.cash}</div>
                         </div>
 
-                        <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                شبكة
-                            </div>
-
-                            <div class="text-blue-400 font-bold">
-                                ${log.network}
-                            </div>
+                        <div class="bg-gray-800/50 rounded-lg p-2 text-center">
+                            <div class="text-gray-400 text-xs mb-1">شبكة</div>
+                            <div class="text-blue-400 font-bold">${log.network}</div>
                         </div>
 
-                        <div class="bg-gray-800 rounded-lg p-2 text-center">
-                            <div class="text-gray-400 mb-1">
-                                الإجمالي
-                            </div>
-
-                            <div class="text-amber-400 font-bold">
-                                ${log.total}
-                            </div>
+                        <div class="bg-gray-800/50 rounded-lg p-2 text-center">
+                            <div class="text-gray-400 text-xs mb-1">الإجمالي</div>
+                            <div class="text-amber-400 font-bold">${log.total}</div>
                         </div>
-
                     </div>
-
                 </div>
-
             `).join('');
         }
 
         // Clear logs
         function clearLogs() {
-
             localStorage.removeItem('salesLogs');
-
             renderLogs();
-
             showToast("تم حذف السجل");
         }
 
         // Reset
         function resetForm() {
-
-            document.getElementById('yesterdayDate').value = '';
             document.getElementById('cardsToday').value = '';
             document.getElementById('cardsYesterday').value = '';
             document.getElementById('cashAvailable').value = '';
@@ -639,20 +482,15 @@
 
             calculate();
         }
-
-        // Initial load
-        renderLogs();
-
     </script>
+
+    <!-- Service Worker Registration -->
     <script>
-  if ('serviceWorker' in navigator) {
-    // تم تغيير /sw.js إلى ./sw.js لتحديد مجلد المشروع الحالي
-    navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('Service Worker Registered!'))
-      .catch((err) => console.log('Service Worker Failed:', err));
-  }
-</script>
-
-
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js')
+                .then(() => console.log('Service Worker Registered Successfully!'))
+                .catch((err) => console.log('Service Worker Registration Failed:', err));
+        }
+    </script>
 </body>
 </html>

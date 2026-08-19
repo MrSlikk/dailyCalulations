@@ -646,8 +646,10 @@
     </script>
     <script>
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js')
-      .then(() => console.log('Service Worker Registered!'));
+    // تم تغيير /sw.js إلى ./sw.js لتحديد مجلد المشروع الحالي
+    navigator.serviceWorker.register('./sw.js')
+      .then(() => console.log('Service Worker Registered!'))
+      .catch((err) => console.log('Service Worker Failed:', err));
   }
 </script>
 

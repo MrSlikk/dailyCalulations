@@ -11,8 +11,9 @@
     <link rel="apple-touch-icon" href="icon-512.png">
     <meta name="theme-color" content="#10b981">
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS & Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
@@ -44,6 +45,7 @@
             <p class="text-gray-400 text-sm">
                 أدخل البيانات أدناه للحصول على تقرير اليوم تلقائياً
             </p>
+            <p id="syncStatus" class="text-xs text-emerald-400/80 mt-1">متصل بالسحابة ☁️</p>
         </div>
 
         <!-- Inputs -->
@@ -229,6 +231,11 @@
     </div>
 
     <script>
+        // SUPABASE CONFIGURATION
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // Globals
         let formattedDateString = "-";
         let globalCash = 0;
@@ -245,7 +252,7 @@
             
             dateInput.value = `${year}-${month}-${day}`;
             calculate();
-            renderLogs();
+            fetchAndRenderLogs();
         });
 
         // Calculate
@@ -257,7 +264,6 @@
             const expensesToday = parseFloat(document.getElementById('expensesToday').value) || 0;
             const network = parseFloat(document.getElementById('network').value) || 0;
 
-            // Date Formatting Fix (prevents UTC timezone offset issues)
             const dateInput = document.getElementById('yesterdayDate').value;
             const outDateEl = document.getElementById('outDate');
 
@@ -279,19 +285,16 @@
                 outDateEl.innerText = "-";
             }
 
-            // Calculations
             const cardWork = cardsYesterday - cardsToday;
             const netCash = cashAvailable - cardWork;
             const totalSales = ((expensesToday + network) - cashYesterday) + netCash;
             const networkRevenue = network;
             const cashRevenue = totalSales - network;
 
-            // Store globals
             globalCash = cashRevenue;
             globalNetwork = networkRevenue;
             globalTotal = totalSales;
 
-            // Output
             document.getElementById('outCardWork').innerText = cardWork.toFixed(2);
             document.getElementById('outNetCash').innerText = netCash.toFixed(2);
             document.getElementById('outCashRevenue').innerText = cashRevenue.toFixed(2);
@@ -299,7 +302,6 @@
             document.getElementById('outTotal').innerText = totalSales.toFixed(2);
         }
 
-        // Toast
         function showToast(message = "تمت العملية بنجاح", success = true) {
             const toast = document.getElementById('toast');
             toast.innerHTML = `<span>${message}</span>`;
@@ -317,7 +319,6 @@
             }, 2000);
         }
 
-        // Report text
         function generateReportText() {
             return `${formattedDateString}
 
@@ -327,7 +328,6 @@
 الاجمالي: ${globalTotal.toFixed(0)}`;
         }
 
-        // Copy
         function copyReport() {
             const reportText = generateReportText();
 
@@ -340,12 +340,11 @@
                 });
         }
 
-        // WhatsApp
-        function sendWhatsApp() {
+        async function sendWhatsApp() {
             const reportText = generateReportText();
             const encodedText = encodeURIComponent(reportText);
 
-            saveLog();
+            await saveLog();
 
             window.open(
                 `https://wa.me/?text=${encodedText}`,
@@ -353,47 +352,58 @@
             );
         }
 
-        // Save FULL input values
-        function saveLog() {
-            if (formattedDateString === "-") return;
+        // Save entry to Supabase (Upsert by date)
+        async function saveLog() {
+            const dateISO = document.getElementById('yesterdayDate').value;
+            if (!dateISO || formattedDateString === "-") return;
 
-            let logs = JSON.parse(localStorage.getItem('salesLogs')) || [];
-
-            const newLog = {
-                date: formattedDateString,
-
-                // INPUT VALUES
-                cardsYesterday: document.getElementById('cardsYesterday').value || "0",
-                cardsToday: document.getElementById('cardsToday').value || "0",
-                cashAvailable: document.getElementById('cashAvailable').value || "0",
-                cashYesterday: document.getElementById('cashYesterday').value || "0",
-                expensesToday: document.getElementById('expensesToday').value || "0",
-                networkInput: document.getElementById('network').value || "0",
-
-                // OUTPUT VALUES
-                cash: globalCash.toFixed(2),
-                network: globalNetwork.toFixed(2),
-                total: globalTotal.toFixed(2),
-                timestamp: Date.now()
+            const logPayload = {
+                date_iso: dateISO,
+                log_date: formattedDateString,
+                cards_yesterday: parseFloat(document.getElementById('cardsYesterday').value) || 0,
+                cards_today: parseFloat(document.getElementById('cardsToday').value) || 0,
+                cash_available: parseFloat(document.getElementById('cashAvailable').value) || 0,
+                cash_yesterday: parseFloat(document.getElementById('cashYesterday').value) || 0,
+                expenses_today: parseFloat(document.getElementById('expensesToday').value) || 0,
+                network_input: parseFloat(document.getElementById('network').value) || 0,
+                cash_revenue: globalCash.toFixed(2),
+                network_revenue: globalNetwork.toFixed(2),
+                total_sales: globalTotal.toFixed(2)
             };
 
-            // Prevent duplicate same day
-            logs = logs.filter(log => log.date !== formattedDateString);
-            logs.unshift(newLog);
+            const { error } = await db
+                .from('sales_logs')
+                .upsert(logPayload, { onConflict: 'date_iso' });
 
-            // Keep only 7 logs
-            logs = logs.slice(0, 7);
-
-            localStorage.setItem('salesLogs', JSON.stringify(logs));
-            renderLogs();
+            if (error) {
+                showToast("فشل الحفظ في السحابة!", false);
+                console.error(error);
+            } else {
+                showToast("تم حفظ التقرير في السحابة ☁️");
+                fetchAndRenderLogs();
+            }
         }
 
-        // Render logs
-        function renderLogs() {
+        // Fetch logs from Supabase
+        async function fetchAndRenderLogs() {
             const container = document.getElementById('logsContainer');
-            const logs = JSON.parse(localStorage.getItem('salesLogs')) || [];
 
-            if (logs.length === 0) {
+            const { data: logs, error } = await db
+                .from('sales_logs')
+                .select('*')
+                .order('date_iso', { ascending: false })
+                .limit(7);
+
+            if (error) {
+                container.innerHTML = `
+                    <div class="text-center text-red-400 text-sm py-4 border border-dashed border-red-500/30 rounded-xl">
+                        خطأ في تحميل البيانات من السحابة
+                    </div>
+                `;
+                return;
+            }
+
+            if (!logs || logs.length === 0) {
                 container.innerHTML = `
                     <div class="text-center text-gray-500 text-sm py-4 border border-dashed border-gray-700 rounded-xl">
                         لا يوجد سجل حالياً
@@ -404,74 +414,75 @@
 
             container.innerHTML = logs.map(log => `
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-4">
-                    <!-- Header -->
                     <div class="flex justify-between items-center mb-4">
-                        <span class="text-sm text-gray-400">${log.date}</span>
-                        <span class="text-amber-400 font-bold">${log.total}</span>
+                        <span class="text-sm text-gray-400">${log.log_date}</span>
+                        <span class="text-amber-400 font-bold">${log.total_sales}</span>
                     </div>
 
-                    <!-- INPUT VALUES -->
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-4">
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">بطايق أمس</div>
-                            <div class="text-white font-bold">${log.cardsYesterday}</div>
+                            <div class="text-white font-bold">${log.cards_yesterday}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">الرصيد المتبقي</div>
-                            <div class="text-cyan-400 font-bold">${log.cardsToday}</div>
+                            <div class="text-cyan-400 font-bold">${log.cards_today}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">الكاش المتوفر</div>
-                            <div class="text-white font-bold">${log.cashAvailable}</div>
+                            <div class="text-white font-bold">${log.cash_available}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">صافي كاش أمس</div>
-                            <div class="text-white font-bold">${log.cashYesterday}</div>
+                            <div class="text-white font-bold">${log.cash_yesterday}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">خرجيات اليوم</div>
-                            <div class="text-white font-bold">${log.expensesToday}</div>
+                            <div class="text-white font-bold">${log.expenses_today}</div>
                         </div>
 
                         <div class="bg-gray-800 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">الشبكة</div>
-                            <div class="text-blue-400 font-bold">${log.networkInput}</div>
+                            <div class="text-blue-400 font-bold">${log.network_input}</div>
                         </div>
                     </div>
 
-                    <!-- FINAL RESULTS -->
                     <div class="grid grid-cols-3 gap-3 text-sm border-t border-gray-800 pt-3">
                         <div class="bg-gray-800/50 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">نقداً</div>
-                            <div class="text-emerald-400 font-bold">${log.cash}</div>
+                            <div class="text-emerald-400 font-bold">${log.cash_revenue}</div>
                         </div>
 
                         <div class="bg-gray-800/50 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">شبكة</div>
-                            <div class="text-blue-400 font-bold">${log.network}</div>
+                            <div class="text-blue-400 font-bold">${log.network_revenue}</div>
                         </div>
 
                         <div class="bg-gray-800/50 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">الإجمالي</div>
-                            <div class="text-amber-400 font-bold">${log.total}</div>
+                            <div class="text-amber-400 font-bold">${log.total_sales}</div>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // Clear logs
-        function clearLogs() {
-            localStorage.removeItem('salesLogs');
-            renderLogs();
-            showToast("تم حذف السجل");
+        async function clearLogs() {
+            if (confirm("هل أنت أصلًا متاكد من حذف جميع السجلات من السحابة؟")) {
+                const { error } = await db.from('sales_logs').delete().neq('id', 0);
+                if (error) {
+                    showToast("فشل حذف السجل!", false);
+                } else {
+                    showToast("تم حذف السجل بالكامل");
+                    fetchAndRenderLogs();
+                }
+            }
         }
 
-        // Reset
         function resetForm() {
             document.getElementById('cardsToday').value = '';
             document.getElementById('cardsYesterday').value = '';

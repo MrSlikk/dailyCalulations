@@ -121,6 +121,16 @@
                     class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all" />
             </div>
 
+            <!-- Notes Input -->
+            <div class="md:col-span-2 flex flex-col gap-2">
+                <label class="text-sm font-medium text-gray-300">
+                    ملاحظات:
+                </label>
+
+                <textarea id="notesInput" rows="2" placeholder="أضف ملاحظات اليوم أو الغد هنا..."
+                    class="bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition-all text-right resize-none"></textarea>
+            </div>
+
         </div>
 
         <hr class="border-gray-700 my-6" />
@@ -219,7 +229,7 @@
 
                 <button onclick="clearLogs()"
                     class="text-xs text-red-400 hover:text-red-300 transition-all cursor-pointer">
-                    حذف السجل
+                    حذف السجل بالكامل
                 </button>
 
             </div>
@@ -320,12 +330,15 @@
         }
 
         function generateReportText() {
-            return `${formattedDateString}
+            const notes = document.getElementById('notesInput').value.trim();
+            let report = `${formattedDateString}
 
 نقدا: ${globalCash.toFixed(0)}
 شبكة: ${globalNetwork.toFixed(0)}
 ------------
 الاجمالي: ${globalTotal.toFixed(0)}`;
+
+            return report;
         }
 
         function copyReport() {
@@ -368,7 +381,8 @@
                 network_input: parseFloat(document.getElementById('network').value) || 0,
                 cash_revenue: globalCash.toFixed(2),
                 network_revenue: globalNetwork.toFixed(2),
-                total_sales: globalTotal.toFixed(2)
+                total_sales: globalTotal.toFixed(2),
+                notes: document.getElementById('notesInput').value.trim()
             };
 
             const { error } = await db
@@ -416,7 +430,14 @@
                 <div class="bg-gray-900 border border-gray-700 rounded-xl p-4">
                     <div class="flex justify-between items-center mb-4">
                         <span class="text-sm text-gray-400">${log.log_date}</span>
-                        <span class="text-amber-400 font-bold">${log.total_sales}</span>
+                        <div class="flex items-center gap-3">
+                            <span class="text-amber-400 font-bold">${log.total_sales}</span>
+                            <button onclick="deleteSingleLog('${log.date_iso}')" 
+                                class="text-red-400/70 hover:text-red-400 hover:bg-red-500/10 p-1.5 rounded-lg transition-all cursor-pointer" 
+                                title="حذف هذا التقرير">
+                                🗑️
+                            </button>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-sm mb-4">
@@ -451,6 +472,12 @@
                         </div>
                     </div>
 
+                    ${log.notes ? `
+                        <div class="bg-gray-800/60 border border-gray-700/50 rounded-lg p-2.5 mb-3 text-xs text-gray-300">
+                            <span class="font-bold text-emerald-400">ملاحظة: </span>${log.notes}
+                        </div>
+                    ` : ''}
+
                     <div class="grid grid-cols-3 gap-3 text-sm border-t border-gray-800 pt-3">
                         <div class="bg-gray-800/50 rounded-lg p-2 text-center">
                             <div class="text-gray-400 text-xs mb-1">نقداً</div>
@@ -471,8 +498,26 @@
             `).join('');
         }
 
+        // Delete single report by date_iso
+        async function deleteSingleLog(dateISO) {
+            if (confirm("هل أنت تأكد من حذف هذا التقرير؟")) {
+                const { error } = await db
+                    .from('sales_logs')
+                    .delete()
+                    .eq('date_iso', dateISO);
+
+                if (error) {
+                    showToast("فشل حذف التقرير!", false);
+                    console.error(error);
+                } else {
+                    showToast("تم حذف التقرير بنجاح 🗑️");
+                    fetchAndRenderLogs();
+                }
+            }
+        }
+
         async function clearLogs() {
-            if (confirm("هل أنت أصلًا متاكد من حذف جميع السجلات من السحابة؟")) {
+            if (confirm("هل أنت متاكد من حذف جميع السجلات من السحابة؟")) {
                 const { error } = await db.from('sales_logs').delete().neq('id', 0);
                 if (error) {
                     showToast("فشل حذف السجل!", false);
@@ -490,6 +535,7 @@
             document.getElementById('cashYesterday').value = '';
             document.getElementById('expensesToday').value = '';
             document.getElementById('network').value = '';
+            document.getElementById('notesInput').value = '';
 
             calculate();
         }

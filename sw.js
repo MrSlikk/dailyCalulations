@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sales-calc-v2'; // Increment this (v1 -> v2) whenever you update files
+const CACHE_NAME = 'sales-calc-v3'; // Increment this (v1 -> v2) whenever you update files
 
 const ASSETS = [
   './',
